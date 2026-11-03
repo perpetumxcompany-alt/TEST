@@ -1,0 +1,45 @@
+name: laura-tts-collect
+
+# Re-collects the artifacts of a finished laura-tts run onto the latest branch head (no re-synthesis).
+on:
+  push:
+    branches: [claude/laura-tts-samples]
+    paths: [".github/workflows/laura-tts-collect.yml"]
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  SOURCE_RUN: "41683542626"
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+          run-id: ${{ env.SOURCE_RUN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -q imageio-ffmpeg
+      - name: Convert and commit samples
+        run: |
+          FF=$(python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
+          mkdir -p samples
+          find out -name '*.wav' | while read -r f; do
+            "$FF" -loglevel error -y -i "$f" -ac 1 -b:a 128k "samples/$(basename "$f" .wav).mp3"
+          done
+          for d in out/*/; do e=$(basename "$d"); for m in "$d"meta*.json; do [ -f "$m" ] && cp "$m" "samples/$e-$(basename "$m")"; done; done
+          printf 'run %s\nqwen-design: success\nqwen-custom: success\nchatterbox: success\ncosyvoice: separate workflow\ngemini: waiting for GEMINI_API_KEY\n' "$SOURCE_RUN" > samples/STATUS.txt
+          ls -la samples
+          git add samples
+          git commit -q -m "Add Qwen3-TTS and Chatterbox samples from run $SOURCE_RUN"
+          for i in 1 2 3 4 5; do git push -q origin "HEAD:$GITHUB_REF_NAME" && break; git pull -q --rebase origin "$GITHUB_REF_NAME"; done
