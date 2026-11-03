@@ -1,0 +1,73 @@
+[
+ {
+  "name": "serena_calm_ref",
+  "engine": "Qwen3-TTS",
+  "gen_s": 104.5,
+  "dur_s": 12.0,
+  "rtf": 0.115,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-CustomVoice",
+  "role": "reference"
+ },
+ {
+  "name": "serena06-take1",
+  "engine": "Qwen3-TTS",
+  "gen_s": 151.5,
+  "dur_s": 23.8,
+  "rtf": 0.157,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "0.6B-Base",
+  "dtype": "float32",
+  "reference": "serena_calm_ref"
+ },
+ {
+  "name": "serena06-take2",
+  "engine": "Qwen3-TTS",
+  "gen_s": 153.6,
+  "dur_s": 24.3,
+  "rtf": 0.158,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "0.6B-Base",
+  "dtype": "float32",
+  "reference": "serena_calm_ref"
+ },
+ {
+  "name": "serena06-bf16",
+  "engine": "Qwen3-TTS",
+  "gen_s": 51.7,
+  "dur_s": 24.7,
+  "rtf": 0.478,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "0.6B-Base",
+  "dtype": "bfloat16",
+  "reference": "serena_calm_ref"
+ },
+ {
+  "name": "serena06-brief",
+  "engine": "Qwen3-TTS",
+  "gen_s": 40.4,
+  "dur_s": 19.4,
+  "rtf": 0.481,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "0.6B-Base",
+  "dtype": "bfloat16",
+  "reference": "serena_calm_ref"
+ },
+ {
+  "name": "serena17-clone",
+  "engine": "Qwen3-TTS",
+  "gen_s": 216.1,
+  "dur_s": 25.0,
+  "rtf": 0.116,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-Base",
+  "dtype": "float32",
+  "reference": "serena_calm_ref"
+ }
+]
