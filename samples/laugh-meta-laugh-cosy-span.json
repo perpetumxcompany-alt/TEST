@@ -1,0 +1,12 @@
+[
+ {
+  "name": "laugh-cosy-span",
+  "engine": "CosyVoice 3",
+  "model": "Fun-CosyVoice3-0.5B-2512",
+  "reference": "serena_calm_ref",
+  "gen_s": 103.3,
+  "dur_s": 7.4,
+  "sr": 24000,
+  "text": "Борис, <laughter>вы опять поставили на утро двенадцать задач?</laughter> Ну хорошо, давайте хотя бы с первой начнём."
+ }
+]
