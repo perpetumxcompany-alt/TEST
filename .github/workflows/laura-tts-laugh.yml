@@ -1,0 +1,92 @@
+name: laura-tts-laugh
+
+# Laughter test: Qwen3-TTS (instruction in 1.7B, plain "ха-ха" in a 0.6B clone) and CosyVoice 3 ([laughter] tags),
+# all in the calm Serena voice. Clones wait for samples/serena_calm_ref.mp3.
+on:
+  push:
+    branches: [claude/laura-tts-samples]
+    paths: [".github/workflows/laura-tts-laugh.yml", "ci/laugh_qwen.py", "ci/laugh_cosyvoice.py"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: laura-tts-laugh
+  cancel-in-progress: true
+
+jobs:
+  qwen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update -q && sudo apt-get install -y -q sox libsox-dev
+      - run: |
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts imageio-ffmpeg
+      - run: python ci/laugh_qwen.py custom
+      - name: Wait for the calm Serena reference
+        run: |
+          for i in $(seq 1 60); do
+            git fetch -q origin "$GITHUB_REF_NAME" && git checkout -q "origin/$GITHUB_REF_NAME" -- samples 2>/dev/null || true
+            [ -f samples/serena_calm_ref.mp3 ] && { echo "found after $i checks"; break; }
+            sleep 60
+          done
+          FF=$(python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          "$FF" -loglevel error -y -i samples/serena_calm_ref.mp3 -ar 24000 -ac 1 serena_ref.wav
+      - run: python ci/laugh_qwen.py clone serena_ref.wav
+      - name: Commit samples
+        if: ${{ !cancelled() }}
+        run: |
+          FF=$(python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
+          mkdir -p samples
+          for f in out/laugh/*.wav; do "$FF" -loglevel error -y -i "$f" -ac 1 -b:a 128k "samples/$(basename "$f" .wav).mp3"; done
+          for m in out/laugh/meta-*.json; do cp "$m" "samples/laugh-$(basename "$m")"; done
+          git add samples && git commit -q -m "Add Qwen3-TTS laughter samples"
+          for i in 1 2 3 4 5; do git push -q origin "HEAD:$GITHUB_REF_NAME" && break; sleep 3; git pull -q --rebase origin "$GITHUB_REF_NAME"; done
+
+  cosyvoice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.10" }
+      - run: sudo apt-get update -q && sudo apt-get install -y -q sox libsox-dev ffmpeg
+      - name: Install CosyVoice (CPU)
+        run: |
+          git clone -q --depth 1 --recursive https://github.com/QwenAudio/CosyVoice.git
+          pip install -q torch==2.3.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q "setuptools<70" wheel onnxruntime==1.18.0 huggingface_hub
+          pip install -q --no-build-isolation openai-whisper==20231117
+          grep -vE '^\s*(--|#)|deepspeed|tensorrt|onnxruntime|gradio|fastapi|grpcio|uvicorn|^torch|openai-whisper' CosyVoice/requirements.txt > req.txt
+          while read -r p; do [ -n "$p" ] && { pip install -q "$p" || echo "::warning::failed to install $p"; }; done < req.txt
+      - name: Download model
+        run: python -c "from huggingface_hub import snapshot_download; snapshot_download('FunAudioLLM/Fun-CosyVoice3-0.5B-2512', local_dir='pretrained_models/Fun-CosyVoice3-0.5B')"
+      - name: Wait for the calm Serena reference
+        run: |
+          for i in $(seq 1 60); do
+            git fetch -q origin "$GITHUB_REF_NAME" && git checkout -q "origin/$GITHUB_REF_NAME" -- samples 2>/dev/null || true
+            [ -f samples/serena_calm_ref.mp3 ] && { echo "found after $i checks"; break; }
+            sleep 60
+          done
+          ffmpeg -loglevel error -y -i samples/serena_calm_ref.mp3 -ar 24000 -ac 1 serena_ref.wav
+      - run: python ci/laugh_cosyvoice.py serena_ref.wav
+      - name: Commit samples
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
+          mkdir -p samples
+          for f in out/laugh/*.wav; do ffmpeg -loglevel error -y -i "$f" -ac 1 -b:a 128k "samples/$(basename "$f" .wav).mp3"; done
+          for m in out/laugh/meta-*.json; do cp "$m" "samples/laugh-$(basename "$m")"; done
+          git add samples && git commit -q -m "Add CosyVoice 3 laughter samples"
+          for i in 1 2 3 4 5; do git push -q origin "HEAD:$GITHUB_REF_NAME" && break; sleep 3; git pull -q --rebase origin "$GITHUB_REF_NAME"; done
