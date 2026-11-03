@@ -1,0 +1,12 @@
+[
+ {
+  "name": "laugh-qwen17-serena",
+  "engine": "Qwen3-TTS",
+  "gen_s": 67.8,
+  "dur_s": 7.8,
+  "sr": 24000,
+  "text": "Борис, вы опять поставили на утро двенадцать задач? Ха-ха-ха. Ну хорошо, давайте хотя бы с первой начнём.",
+  "model": "1.7B-CustomVoice",
+  "instruct": "Speak Russian calmly and warmly, like a composed personal assistant gently teasing a friend. At 'ха-ха-ха' give a soft, short, genuine laugh, then continue calmly with a smile in the voice."
+ }
+]
