@@ -1,0 +1,42 @@
+name: laura-tts-serena-clone
+
+# Calm Serena as a reference, cloned by Qwen3-TTS 0.6B (and 1.7B for comparison) on CPU.
+on:
+  push:
+    branches: [claude/laura-tts-samples]
+    paths: [".github/workflows/laura-tts-serena-clone.yml", "ci/qwen_serena_clone.py"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: laura-tts-serena-clone
+  cancel-in-progress: true
+
+jobs:
+  qwen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update -q && sudo apt-get install -y -q sox libsox-dev
+      - run: |
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts imageio-ffmpeg
+      - run: lscpu | grep -m1 'Model name' && python ci/qwen_serena_clone.py
+      - name: Commit samples
+        if: ${{ !cancelled() }}
+        run: |
+          FF=$(python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
+          mkdir -p samples
+          for f in out/serena-clone/*.wav; do "$FF" -loglevel error -y -i "$f" -ac 1 -b:a 128k "samples/$(basename "$f" .wav).mp3"; done
+          cp out/serena-clone/meta.json samples/serena-clone-meta.json
+          git add samples && git commit -q -m "Add calm Serena clones (Qwen3-TTS 0.6B and 1.7B)"
+          for i in 1 2 3 4 5; do git push -q origin "HEAD:$GITHUB_REF_NAME" && break; sleep 3; git pull -q --rebase origin "$GITHUB_REF_NAME"; done
