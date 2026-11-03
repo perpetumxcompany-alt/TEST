@@ -1,11 +1,11 @@
 name: laura-tts-cosyvoice
 
 # CosyVoice 3 on its own runner: records with the Piper Irina reference right away, then waits for the
-# Qwen-designed Laura reference (samples/laura_ref.mp3, committed by laura-tts) and records with it too.
+# Qwen-designed Laura reference (samples/laura_ref.mp3) and records with it too.
 on:
   push:
     branches: [claude/laura-tts-samples]
-    paths: [".github/workflows/laura-tts-cosyvoice.yml"]
+    paths: [".github/workflows/laura-tts-cosyvoice.yml", "ci/cosyvoice_gen.py"]
 
 permissions:
   contents: write
@@ -34,16 +34,16 @@ jobs:
           PYTHONPATH=CosyVoice:CosyVoice/third_party/Matcha-TTS python -c "from cosyvoice.cli.cosyvoice import AutoModel; print('cosyvoice import ok')"
       - name: Download model
         run: python -c "from huggingface_hub import snapshot_download; snapshot_download('FunAudioLLM/Fun-CosyVoice3-0.5B-2512', local_dir='pretrained_models/Fun-CosyVoice3-0.5B')"
-      - name: Record with the Irina reference and commit
+      - name: Record with the Irina reference
+        run: python ci/cosyvoice_gen.py cosyvoice3-irina-ref tts/fallback_ref.wav
+      - name: Commit the Irina sample
         run: |
-          python tts/gen_cosyvoice.py cosyvoice3-irina-ref=tts/fallback_ref.wav
-          mv out/cosyvoice/meta.json out/cosyvoice/meta-irina.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
           mkdir -p samples
           ffmpeg -loglevel error -y -i out/cosyvoice/cosyvoice3-irina-ref.wav -ac 1 -b:a 128k samples/cosyvoice3-irina-ref.mp3
-          cp out/cosyvoice/meta-irina.json samples/cosyvoice-meta-irina.json
+          cp out/cosyvoice/meta-cosyvoice3-irina-ref.json samples/cosyvoice-meta-irina.json
           git add samples && git commit -q -m "Add CosyVoice 3 sample (Irina reference)"
           for i in 1 2 3 4 5; do git push -q origin "HEAD:$GITHUB_REF_NAME" && break; git pull -q --rebase origin "$GITHUB_REF_NAME"; done
       - name: Wait for the Qwen-designed Laura reference
@@ -55,11 +55,12 @@ jobs:
           done
           test -f samples/laura_ref.mp3
           ffmpeg -loglevel error -y -i samples/laura_ref.mp3 -ar 24000 -ac 1 laura_ref.wav
-      - name: Record with the Laura reference and commit
+      - name: Record with the Laura reference
+        run: python ci/cosyvoice_gen.py cosyvoice3-laura-ref laura_ref.wav
+      - name: Commit the Laura sample
         run: |
-          python tts/gen_cosyvoice.py cosyvoice3-laura-ref=laura_ref.wav
           git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
           ffmpeg -loglevel error -y -i out/cosyvoice/cosyvoice3-laura-ref.wav -ac 1 -b:a 128k samples/cosyvoice3-laura-ref.mp3
-          cp out/cosyvoice/meta.json samples/cosyvoice-meta-laura.json
+          cp out/cosyvoice/meta-cosyvoice3-laura-ref.json samples/cosyvoice-meta-laura.json
           git add samples && git commit -q -m "Add CosyVoice 3 sample (Laura reference)"
           for i in 1 2 3 4 5; do git push -q origin "HEAD:$GITHUB_REF_NAME" && break; git pull -q --rebase origin "$GITHUB_REF_NAME"; done
