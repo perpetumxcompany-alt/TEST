@@ -134,6 +134,14 @@ jobs:
             ffmpeg -loglevel error -y -i "$f" -ac 1 -b:a 128k "samples/$(basename "$f" .wav).mp3"
           done
           for d in out/*/; do e=$(basename "$d"); for m in "$d"meta*.json; do [ -f "$m" ] && cp "$m" "samples/$e-$(basename "$m")"; done; done
+          cat > samples/STATUS.txt <<EOF
+          run ${{ github.run_id }} attempt ${{ github.run_attempt }}
+          qwen-design: ${{ needs.qwen-design.result }}
+          qwen-custom: ${{ needs.qwen-custom.result }}
+          cosyvoice: ${{ needs.cosyvoice.result }}
+          chatterbox: ${{ needs.chatterbox.result }}
+          gemini: ${{ needs.gemini.result }}
+          EOF
           ls -la samples
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
