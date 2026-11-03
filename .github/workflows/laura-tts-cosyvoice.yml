@@ -1,0 +1,65 @@
+name: laura-tts-cosyvoice
+
+# CosyVoice 3 on its own runner: records with the Piper Irina reference right away, then waits for the
+# Qwen-designed Laura reference (samples/laura_ref.mp3, committed by laura-tts) and records with it too.
+on:
+  push:
+    branches: [claude/laura-tts-samples]
+    paths: [".github/workflows/laura-tts-cosyvoice.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: laura-tts-cosyvoice
+  cancel-in-progress: true
+
+jobs:
+  cosyvoice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.10" }
+      - run: sudo apt-get update -q && sudo apt-get install -y -q sox libsox-dev ffmpeg
+      - name: Install CosyVoice (CPU)
+        run: |
+          git clone -q --depth 1 --recursive https://github.com/QwenAudio/CosyVoice.git
+          pip install -q torch==2.3.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q "setuptools<70" wheel onnxruntime==1.18.0 huggingface_hub
+          pip install -q --no-build-isolation openai-whisper==20231117
+          grep -vE '^\s*(--|#)|deepspeed|tensorrt|onnxruntime|gradio|fastapi|grpcio|uvicorn|^torch|openai-whisper' CosyVoice/requirements.txt > req.txt
+          while read -r p; do [ -n "$p" ] && { pip install -q "$p" || echo "::warning::failed to install $p"; }; done < req.txt
+          PYTHONPATH=CosyVoice:CosyVoice/third_party/Matcha-TTS python -c "from cosyvoice.cli.cosyvoice import AutoModel; print('cosyvoice import ok')"
+      - name: Download model
+        run: python -c "from huggingface_hub import snapshot_download; snapshot_download('FunAudioLLM/Fun-CosyVoice3-0.5B-2512', local_dir='pretrained_models/Fun-CosyVoice3-0.5B')"
+      - name: Record with the Irina reference and commit
+        run: |
+          python tts/gen_cosyvoice.py cosyvoice3-irina-ref=tts/fallback_ref.wav
+          mv out/cosyvoice/meta.json out/cosyvoice/meta-irina.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
+          mkdir -p samples
+          ffmpeg -loglevel error -y -i out/cosyvoice/cosyvoice3-irina-ref.wav -ac 1 -b:a 128k samples/cosyvoice3-irina-ref.mp3
+          cp out/cosyvoice/meta-irina.json samples/cosyvoice-meta-irina.json
+          git add samples && git commit -q -m "Add CosyVoice 3 sample (Irina reference)"
+          for i in 1 2 3 4 5; do git push -q origin "HEAD:$GITHUB_REF_NAME" && break; git pull -q --rebase origin "$GITHUB_REF_NAME"; done
+      - name: Wait for the Qwen-designed Laura reference
+        run: |
+          for i in $(seq 1 80); do
+            git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
+            [ -f samples/laura_ref.mp3 ] && { echo "found after $i checks"; break; }
+            sleep 120
+          done
+          test -f samples/laura_ref.mp3
+          ffmpeg -loglevel error -y -i samples/laura_ref.mp3 -ar 24000 -ac 1 laura_ref.wav
+      - name: Record with the Laura reference and commit
+        run: |
+          python tts/gen_cosyvoice.py cosyvoice3-laura-ref=laura_ref.wav
+          git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
+          ffmpeg -loglevel error -y -i out/cosyvoice/cosyvoice3-laura-ref.wav -ac 1 -b:a 128k samples/cosyvoice3-laura-ref.mp3
+          cp out/cosyvoice/meta.json samples/cosyvoice-meta-laura.json
+          git add samples && git commit -q -m "Add CosyVoice 3 sample (Laura reference)"
+          for i in 1 2 3 4 5; do git push -q origin "HEAD:$GITHUB_REF_NAME" && break; git pull -q --rebase origin "$GITHUB_REF_NAME"; done
