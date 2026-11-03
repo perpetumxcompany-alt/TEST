@@ -58,7 +58,7 @@ jobs:
 
   cosyvoice:
     needs: qwen-design
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     steps:
@@ -85,7 +85,7 @@ jobs:
 
   chatterbox:
     needs: qwen-design
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     steps:
@@ -120,7 +120,7 @@ jobs:
 
   collect:
     needs: [qwen-design, qwen-custom, cosyvoice, chatterbox, gemini]
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
