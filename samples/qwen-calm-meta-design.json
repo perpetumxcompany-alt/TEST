@@ -1,0 +1,86 @@
+[
+ {
+  "name": "calm1_ref",
+  "engine": "Qwen3-TTS",
+  "gen_s": 93.6,
+  "dur_s": 10.6,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-VoiceDesign",
+  "role": "reference",
+  "description": "A native Russian speaker with clear, standard literary pronunciation. Studio-quality close-microphone recording, no background noise. A calm, soft-spoken woman in her early thirties. Medium-high feminine pitch, but relaxed and unhurried, gentle low-energy delivery. Warm, slightly velvety timbre with a light breathiness. Smooth, even intonation, soft natural rises on questions, settled falling endings. Never cheerful or excited."
+ },
+ {
+  "name": "calm2_ref",
+  "engine": "Qwen3-TTS",
+  "gen_s": 109.8,
+  "dur_s": 12.6,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-VoiceDesign",
+  "role": "reference",
+  "description": "A native Russian speaker with clear, standard literary pronunciation. Studio-quality close-microphone recording, no background noise. A composed, confident woman of about thirty-five who speaks like a late-night radio host: low-key, measured pace, soft falling cadences, warm velvety mid-high female timbre, quiet assurance. Questions rise gently, without any sing-song energy."
+ },
+ {
+  "name": "calm3_ref",
+  "engine": "Qwen3-TTS",
+  "gen_s": 93.2,
+  "dur_s": 11.0,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-VoiceDesign",
+  "role": "reference",
+  "description": "A native Russian speaker with clear, standard literary pronunciation. Studio-quality close-microphone recording, no background noise. A gentle, serene young woman with a quiet, tender voice: medium-high pitch, slightly husky and airy, slow and thoughtful pace, minimal pitch jumps, calm and reassuring, intimate but clear."
+ },
+ {
+  "name": "calm4_ref",
+  "engine": "Qwen3-TTS",
+  "gen_s": 85.1,
+  "dur_s": 9.8,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-VoiceDesign",
+  "role": "reference",
+  "description": "A native Russian speaker with clear, standard literary pronunciation. Studio-quality close-microphone recording, no background noise. An elegant, calm professional female voice, a little lower than average female pitch but clearly feminine, with warm chest resonance. Steady, soothing, unhurried delivery; restrained, natural intonation with clear but soft question rises."
+ },
+ {
+  "name": "qwen3-calm1-clone",
+  "engine": "Qwen3-TTS",
+  "gen_s": 239.3,
+  "dur_s": 25.8,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-Base",
+  "reference": "calm1_ref"
+ },
+ {
+  "name": "qwen3-calm2-clone",
+  "engine": "Qwen3-TTS",
+  "gen_s": 236.5,
+  "dur_s": 25.3,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-Base",
+  "reference": "calm2_ref"
+ },
+ {
+  "name": "qwen3-calm3-clone",
+  "engine": "Qwen3-TTS",
+  "gen_s": 235.9,
+  "dur_s": 24.2,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-Base",
+  "reference": "calm3_ref"
+ },
+ {
+  "name": "qwen3-calm4-clone",
+  "engine": "Qwen3-TTS",
+  "gen_s": 235.5,
+  "dur_s": 24.1,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-Base",
+  "reference": "calm4_ref"
+ }
+]
