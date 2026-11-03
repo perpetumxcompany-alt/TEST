@@ -1,0 +1,53 @@
+{
+ "cpu": "Model name:                              Intel(R) Xeon(R) 6973P-C",
+ "cores": 4,
+ "torch": "2.15.0+cpu",
+ "machine": "x86_64",
+ "runs": [
+  {
+   "model": "0.6B",
+   "dtype": "float32",
+   "text": "short",
+   "audio_s": 3.28,
+   "compute_s": 17.59,
+   "rtf": 0.186,
+   "load_s": 30.1
+  },
+  {
+   "model": "0.6B",
+   "dtype": "float32",
+   "text": "full",
+   "audio_s": 24.08,
+   "compute_s": 101.45,
+   "rtf": 0.237,
+   "load_s": 30.1
+  },
+  {
+   "model": "0.6B",
+   "dtype": "bfloat16",
+   "text": "short",
+   "audio_s": 2.88,
+   "compute_s": 9.24,
+   "rtf": 0.312,
+   "load_s": 1.7
+  },
+  {
+   "model": "1.7B",
+   "dtype": "float32",
+   "text": "short",
+   "audio_s": 3.12,
+   "compute_s": 22.91,
+   "rtf": 0.136,
+   "load_s": 38.0
+  },
+  {
+   "model": "1.7B",
+   "dtype": "float32",
+   "text": "full",
+   "audio_s": 23.36,
+   "compute_s": 136.46,
+   "rtf": 0.171,
+   "load_s": 38.0
+  }
+ ]
+}
