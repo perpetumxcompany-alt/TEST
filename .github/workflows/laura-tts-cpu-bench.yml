@@ -1,0 +1,46 @@
+name: laura-tts-cpu-bench
+
+# Measures Qwen3-TTS speed on a CPU-only runner (no GPU): 0.6B vs 1.7B, fp32 vs bf16.
+on:
+  push:
+    branches: [claude/laura-tts-samples]
+    paths: [".github/workflows/laura-tts-cpu-bench.yml", "ci/qwen_cpu_bench.py"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: laura-tts-cpu-bench
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update -q && sudo apt-get install -y -q sox libsox-dev
+      - run: |
+          pip install -q torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -q qwen-tts imageio-ffmpeg
+      - name: Benchmark
+        run: |
+          FF=$(python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          "$FF" -loglevel error -y -i samples/laura_ref.mp3 -ar 24000 -ac 1 ref.wav
+          lscpu | head -20
+          python ci/qwen_cpu_bench.py ref.wav
+      - name: Commit results
+        run: |
+          FF=$(python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin "$GITHUB_REF_NAME" && git reset -q --hard "origin/$GITHUB_REF_NAME"
+          mkdir -p samples
+          cp out/bench/cpu-bench.json samples/cpu-bench.json
+          for f in out/bench/*.wav; do "$FF" -loglevel error -y -i "$f" -ac 1 -b:a 128k "samples/$(basename "$f" .wav).mp3"; done
+          git add samples && git commit -q -m "Add Qwen3-TTS CPU benchmark"
+          for i in 1 2 3 4 5; do git push -q origin "HEAD:$GITHUB_REF_NAME" && break; sleep 3; git pull -q --rebase origin "$GITHUB_REF_NAME"; done
