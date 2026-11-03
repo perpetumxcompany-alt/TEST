@@ -1,0 +1,12 @@
+[
+ {
+  "name": "cosyvoice3-irina-ref",
+  "engine": "CosyVoice 3",
+  "model": "Fun-CosyVoice3-0.5B-2512",
+  "reference": "tts/fallback_ref.wav",
+  "gen_s": 188.5,
+  "dur_s": 27.0,
+  "sr": 24000,
+  "cpus": 4
+ }
+]
