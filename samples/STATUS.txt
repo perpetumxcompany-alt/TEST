@@ -1,0 +1,6 @@
+run 41683542626
+qwen-design: success
+qwen-custom: success
+chatterbox: success
+cosyvoice: separate workflow
+gemini: waiting for GEMINI_API_KEY

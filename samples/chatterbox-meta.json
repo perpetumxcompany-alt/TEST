@@ -6,8 +6,20 @@
   "reference": "default",
   "exaggeration": 0.6,
   "cfg_weight": 0.5,
-  "gen_s": 202.7,
-  "dur_s": 24.7,
+  "gen_s": 240.0,
+  "dur_s": 25.1,
+  "sr": 24000,
+  "cpus": 4
+ },
+ {
+  "name": "chatterbox-laura-ref",
+  "engine": "Chatterbox",
+  "model": "Multilingual V3",
+  "reference": "ref_in/qwen/laura_ref.wav",
+  "exaggeration": 0.6,
+  "cfg_weight": 0.5,
+  "gen_s": 313.8,
+  "dur_s": 27.9,
   "sr": 24000,
   "cpus": 4
  },
@@ -18,8 +30,8 @@
   "reference": "tts/fallback_ref.wav",
   "exaggeration": 0.6,
   "cfg_weight": 0.5,
-  "gen_s": 291.1,
-  "dur_s": 32.2,
+  "gen_s": 339.0,
+  "dur_s": 31.6,
   "sr": 24000,
   "cpus": 4
  }

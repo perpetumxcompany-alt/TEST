@@ -1,0 +1,22 @@
+[
+ {
+  "name": "qwen3-custom-serena",
+  "engine": "Qwen3-TTS",
+  "gen_s": 149.6,
+  "dur_s": 27.5,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-CustomVoice",
+  "speaker": "Serena"
+ },
+ {
+  "name": "qwen3-custom-vivian",
+  "engine": "Qwen3-TTS",
+  "gen_s": 139.4,
+  "dur_s": 25.8,
+  "sr": 24000,
+  "cpus": 4,
+  "model": "1.7B-CustomVoice",
+  "speaker": "Vivian"
+ }
+]
