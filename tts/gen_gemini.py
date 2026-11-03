@@ -5,8 +5,9 @@ import base64, json, os, sys, time, urllib.error, urllib.request, wave
 
 key = os.environ.get("GEMINI_API_KEY", "").strip()
 if not key:
-    print("GEMINI_API_KEY secret is not set: skipping Gemini.")
-    sys.exit(0)
+    # Fail on purpose: once the secret is added, "Re-run failed jobs" runs only Gemini and the collector.
+    print("::error::GEMINI_API_KEY secret is not set. Add it in Settings > Secrets and variables > Actions.")
+    sys.exit(1)
 
 cfg = json.load(open("tts/config.json", encoding="utf-8"))
 base = "https://generativelanguage.googleapis.com/v1beta"
