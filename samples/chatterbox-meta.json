@@ -1,0 +1,26 @@
+[
+ {
+  "name": "chatterbox-default",
+  "engine": "Chatterbox",
+  "model": "Multilingual V3",
+  "reference": "default",
+  "exaggeration": 0.6,
+  "cfg_weight": 0.5,
+  "gen_s": 202.7,
+  "dur_s": 24.7,
+  "sr": 24000,
+  "cpus": 4
+ },
+ {
+  "name": "chatterbox-irina-ref",
+  "engine": "Chatterbox",
+  "model": "Multilingual V3",
+  "reference": "tts/fallback_ref.wav",
+  "exaggeration": 0.6,
+  "cfg_weight": 0.5,
+  "gen_s": 291.1,
+  "dur_s": 32.2,
+  "sr": 24000,
+  "cpus": 4
+ }
+]
