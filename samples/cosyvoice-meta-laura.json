@@ -1,0 +1,12 @@
+[
+ {
+  "name": "cosyvoice3-laura-ref",
+  "engine": "CosyVoice 3",
+  "model": "Fun-CosyVoice3-0.5B-2512",
+  "reference": "laura_ref.wav",
+  "gen_s": 188.2,
+  "dur_s": 27.3,
+  "sr": 24000,
+  "cpus": 4
+ }
+]
